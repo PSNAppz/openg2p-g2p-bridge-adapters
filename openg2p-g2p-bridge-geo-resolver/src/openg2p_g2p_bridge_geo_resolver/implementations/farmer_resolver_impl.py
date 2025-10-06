@@ -23,18 +23,18 @@ class FarmerGeoResolverImpl(GeoResolver):
             beneficiary_ids = [item["beneficiary_id"] for item in batch_beneficiary_list]
             farmer_details = registry_session.execute(
                 select(
-                    G2PFarmerRegistry.unique_id,
+                    G2PFarmerRegistry.link_registry_id,
                     G2PFarmerRegistry.large_area_id,
                     G2PFarmerRegistry.large_area_code,
                     G2PFarmerRegistry.small_area_id,
                     G2PFarmerRegistry.small_area_code,
-                ).where(G2PFarmerRegistry.unique_id.in_(beneficiary_ids))
+                ).where(G2PFarmerRegistry.link_registry_id.in_(beneficiary_ids))
             ).fetchall()
             _logger.info(f"Fetched {len(farmer_details)} farmer details for the provided beneficiary IDs")
             if not farmer_details:
                 _logger.warning(f"No farmer details found for the provided beneficiary IDs {beneficiary_ids}")
                 return results
-            farmer_map = {row.unique_id: row for row in farmer_details}
+            farmer_map = {row.link_registry_id: row for row in farmer_details}
             for item in batch_beneficiary_list:
                 row = farmer_map.get(item["beneficiary_id"])
                 if row:

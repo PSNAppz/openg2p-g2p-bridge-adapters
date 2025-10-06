@@ -9,7 +9,7 @@ class G2PFarmerRegistry(BaseORMModel):
     __tablename__ = "g2p_farmer_registry"
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    unique_id = mapped_column(String, nullable=True)
+    link_registry_id = mapped_column(String, nullable=True)
     registration_date = mapped_column(DateTime, default=datetime.now(), nullable=False)
     name = mapped_column(String, nullable=False)
     land_area = mapped_column(Float, nullable=True)
