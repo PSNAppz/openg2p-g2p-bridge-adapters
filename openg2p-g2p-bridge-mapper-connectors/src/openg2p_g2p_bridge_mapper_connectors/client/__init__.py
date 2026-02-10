@@ -1,1 +1,2 @@
 from .spar_mapper_client import SPARMapperClient
+from .spar_mapper_v1_client import SPARMapperV1Client
