@@ -51,7 +51,7 @@ class SPARMapperClient(BaseService):
             # Add JWT signature if API signing is enabled
             if self.api_sign_enabled:
                 _logger.debug("Creating JWT signature for request")
-                #orig_headers["Signature"] = await self.crypto_helper.create_jwt_token(payload)
+                # orig_headers["Signature"] = await self.crypto_helper.create_jwt_token(payload)
 
             if headers:
                 orig_headers.update(headers)
@@ -96,4 +96,3 @@ class SPARMapperClient(BaseService):
                 message="Unknown Error in resolve request",
                 code="500",
             ) from e
-

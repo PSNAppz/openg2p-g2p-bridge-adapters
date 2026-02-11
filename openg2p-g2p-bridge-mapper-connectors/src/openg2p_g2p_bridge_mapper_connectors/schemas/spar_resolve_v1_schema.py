@@ -2,8 +2,20 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from openg2p_g2pconnect_common_lib.schemas import Request, StatusEnum, SyncResponse, RequestHeader
+from openg2p_g2pconnect_common_lib.schemas import Request, StatusEnum, SyncResponse
 from pydantic import BaseModel
+
+
+class KeyValuePair(BaseModel):
+    """
+    Schema for key-value pairs used in ID/FA construction and deconstruction.
+
+    Used by StrategyHelper to pass data for constructing and deconstructing
+    ID and FA values using regex patterns and format strings.
+    """
+
+    key: str
+    value: str
 
 
 class ResolveScope(Enum):

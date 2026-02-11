@@ -1,18 +1,19 @@
 import logging
+import re
 from datetime import datetime
+from typing import List
 
 from ..client import SPARMapperV1Client
 from ..interface.mapper_interface import MapperInterface
 from ..schemas import ResolveRequest, ResolveResponse, ResolveResult
 from ..schemas.spar_resolve_v1_schema import (
-    ResolveRequest as SparResolveRequest,
-    RequestHeader
-)
-from ..schemas.spar_resolve_v1_schema import (
+    KeyValuePair,
+    RequestHeader,
     ResolveRequestMessage,
     ResolveScope,
     SingleResolveRequest,
 )
+from ..schemas.spar_resolve_v1_schema import ResolveRequest as SparResolveRequest
 from ..schemas.spar_resolve_v1_schema import (
     ResolveResponse as SparResolveResponse,
 )
@@ -106,10 +107,35 @@ class SPARMapperV1(MapperInterface):
             message=ResolveRequestMessage(
                 transaction_id=f"txn_{int(datetime.now().timestamp())}",
                 resolve_request=single_resolve_requests,
-            )
+            ),
         )
 
         return spar_request
+
+    def _deconstruct(self, value: str, strategy: str) -> List[KeyValuePair]:
+        regex_res = re.match(strategy, value)
+        deconstructed_list = []
+        if regex_res:
+            regex_res = regex_res.groupdict()
+            try:
+                deconstructed_list = [KeyValuePair(key=k, value=v) for k, v in regex_res.items()]
+            except Exception as e:
+                raise ValueError("Error while deconstructing ID/FA") from e
+        return deconstructed_list
+
+    # Map of strategy_id to strategy string (regex or format string as required)
+    STRATEGY_MAP = {
+        1: r"^account_number:(?P<account_number>.*)\.branch_name:(?P<branch_name>.*)\.branch_code:(?P<branch_code>.*)\.bank_name:(?P<bank_name>.*)\.bank_code:(?P<bank_code>.*)\.mobile_number:(?P<mobile_number>.*)\.email_address:(?P<email_address>.*)\.fa_type:(?P<fa_type>.*)$",
+        2: r"^email_address:(?P<email_address>.*)\.wallet_provider_name:(?P<wallet_provider_name>.*)\.wallet_provider_code:(?P<wallet_provider_code>.*)\.fa_type:(?P<fa_type>.*)$",
+        3: r"^mobile_number:(?P<mobile_number>.*)\.wallet_provider_name:(?P<wallet_provider_name>.*)\.wallet_provider_code:(?P<wallet_provider_code>.*)\.fa_type:(?P<fa_type>.*)$",
+    }
+
+    def _deconstruct_fa(self, fa: str, strategy_id: int) -> dict:
+        deconstruct_strategy = self.STRATEGY_MAP.get(strategy_id)
+        deconstructed_pairs = self._deconstruct(fa, deconstruct_strategy)
+        deconstructed_fa = {pair.key: pair.value for pair in deconstructed_pairs}
+        deconstructed_fa["strategy_id"] = 2
+        return deconstructed_fa
 
     def _convert_from_spar_response(self, spar_response: SparResolveResponse) -> ResolveResponse:
         """
@@ -127,6 +153,12 @@ class SPARMapperV1(MapperInterface):
             id_value = single_response.id
 
             fa_value = single_response.fa
+            strategy_id = 2
+            if (
+                single_response.account_provider_info
+                and single_response.account_provider_info.additional_info
+            ):
+                strategy_id = single_response.account_provider_info.additional_info[0]["strategy_id"]
 
             name_value = (
                 single_response.account_provider_info.name if single_response.account_provider_info else None
@@ -134,7 +166,7 @@ class SPARMapperV1(MapperInterface):
 
             result = ResolveResult(
                 id=id_value,
-                fa=fa_value,
+                fa=self._deconstruct_fa(fa_value, strategy_id) if fa_value else None,
                 name=name_value,
             )
 
