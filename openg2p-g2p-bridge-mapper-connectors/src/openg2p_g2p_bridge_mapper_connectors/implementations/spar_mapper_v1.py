@@ -119,6 +119,7 @@ class SPARMapperV1(MapperInterface):
             regex_res = regex_res.groupdict()
             try:
                 deconstructed_list = [KeyValuePair(key=k, value=v) for k, v in regex_res.items()]
+                _logger.debug(f"Deconstructed list: {deconstructed_list}")
             except Exception as e:
                 raise ValueError("Error while deconstructing ID/FA") from e
         return deconstructed_list
@@ -132,9 +133,11 @@ class SPARMapperV1(MapperInterface):
 
     def _deconstruct_fa(self, fa: str, strategy_id: int) -> dict:
         deconstruct_strategy = self.STRATEGY_MAP.get(strategy_id)
+        _logger.debug(f"Deconstructing FA with strategy ID {strategy_id}: {deconstruct_strategy}")
         deconstructed_pairs = self._deconstruct(fa, deconstruct_strategy)
         deconstructed_fa = {pair.key: pair.value for pair in deconstructed_pairs}
         deconstructed_fa["strategy_id"] = 2
+        _logger.debug(f"Deconstructed FA dict: {deconstructed_fa}")
         return deconstructed_fa
 
     def _convert_from_spar_response(self, spar_response: SparResolveResponse) -> ResolveResponse:
@@ -159,14 +162,15 @@ class SPARMapperV1(MapperInterface):
                 and single_response.account_provider_info.additional_info
             ):
                 strategy_id = single_response.account_provider_info.additional_info[0]["strategy_id"]
-
+            deconstructed_fa = self._deconstruct_fa(fa_value, strategy_id) if fa_value else None
+            _logger.debug(f"Deconstructed FA: {deconstructed_fa}")
             name_value = (
                 single_response.account_provider_info.name if single_response.account_provider_info else None
             )
 
             result = ResolveResult(
                 id=id_value,
-                fa=self._deconstruct_fa(fa_value, strategy_id) if fa_value else None,
+                fa=deconstructed_fa,
                 name=name_value,
             )
 
