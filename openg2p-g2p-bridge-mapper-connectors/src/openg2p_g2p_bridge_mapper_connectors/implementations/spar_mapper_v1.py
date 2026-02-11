@@ -6,6 +6,7 @@ from ..interface.mapper_interface import MapperInterface
 from ..schemas import ResolveRequest, ResolveResponse, ResolveResult
 from ..schemas.spar_resolve_v1_schema import (
     ResolveRequest as SparResolveRequest,
+    RequestHeader
 )
 from ..schemas.spar_resolve_v1_schema import (
     ResolveRequestMessage,
@@ -90,6 +91,18 @@ class SPARMapperV1(MapperInterface):
 
         # Create the full SPAR request with flatter message structure
         spar_request = SparResolveRequest(
+            header=RequestHeader(
+                version="1.0.0",
+                message_id=f"msg_{int(datetime.now().timestamp())}",
+                message_ts=datetime.now().isoformat(),
+                action="resolve",
+                sender_id="g2p_bridge_mapper",
+                sender_uri="",
+                receiver_id="spar_mapper",
+                total_count=len(single_resolve_requests),
+                is_msg_encrypted=False,
+                meta=None,
+            ),
             message=ResolveRequestMessage(
                 transaction_id=f"txn_{int(datetime.now().timestamp())}",
                 resolve_request=single_resolve_requests,
