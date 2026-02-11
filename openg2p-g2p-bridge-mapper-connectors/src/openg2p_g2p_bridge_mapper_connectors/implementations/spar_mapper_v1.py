@@ -126,9 +126,9 @@ class SPARMapperV1(MapperInterface):
 
     # Map of strategy_id to strategy string (regex or format string as required)
     STRATEGY_MAP = {
-        1: r"^account_number:(?P<account_number>.*)\.branch_name:(?P<branch_name>.*)\.branch_code:(?P<branch_code>.*)\.bank_name:(?P<bank_name>.*)\.bank_code:(?P<bank_code>.*)\.mobile_number:(?P<mobile_number>.*)\.email_address:(?P<email_address>.*)\.fa_type:(?P<fa_type>.*)$",
-        2: r"^email_address:(?P<email_address>.*)\.wallet_provider_name:(?P<wallet_provider_name>.*)\.wallet_provider_code:(?P<wallet_provider_code>.*)\.fa_type:(?P<fa_type>.*)$",
-        3: r"^mobile_number:(?P<mobile_number>.*)\.wallet_provider_name:(?P<wallet_provider_name>.*)\.wallet_provider_code:(?P<wallet_provider_code>.*)\.fa_type:(?P<fa_type>.*)$",
+        2: r"^account_number:(?P<account_number>.*)\.branch_name:(?P<branch_name>.*)\.branch_code:(?P<branch_code>.*)\.bank_name:(?P<bank_name>.*)\.bank_code:(?P<bank_code>.*)\.mobile_number:(?P<mobile_number>.*)\.email_address:(?P<email_address>.*)\.fa_type:(?P<fa_type>.*)$",
+        3: r"^email_address:(?P<email_address>.*)\.wallet_provider_name:(?P<wallet_provider_name>.*)\.wallet_provider_code:(?P<wallet_provider_code>.*)\.fa_type:(?P<fa_type>.*)$",
+        4: r"^mobile_number:(?P<mobile_number>.*)\.wallet_provider_name:(?P<wallet_provider_name>.*)\.wallet_provider_code:(?P<wallet_provider_code>.*)\.fa_type:(?P<fa_type>.*)$",
     }
 
     def _deconstruct_fa(self, fa: str, strategy_id: int) -> dict:
@@ -177,7 +177,7 @@ class SPARMapperV1(MapperInterface):
             results.append(result)
 
             _logger.debug(
-                f"Converted result: id={id_value}, fa={fa_value}, name={name_value}, "
+                f"Converted result: id={id_value}, fa={deconstructed_fa}, name={name_value}, "
                 f"status={single_response.status}, status_reason={single_response.status_reason_code}"
             )
 
