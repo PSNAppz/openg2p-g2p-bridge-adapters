@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from openg2p_g2pconnect_common_lib.schemas import Request, StatusEnum, SyncResponse
+from openg2p_g2pconnect_common_lib.schemas import Request, StatusEnum, SyncResponse, RequestHeader
 from pydantic import BaseModel
 
 
